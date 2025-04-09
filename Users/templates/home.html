@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load dict_filters %}
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block script %}
+<script>
+  function openPopup(articleId, articleTitle) {
+    const desc = prompt("Beschreibung für '" + articleTitle + "' eingeben:");
+    if (desc !== null && desc.trim() !== "") {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '/add-special/' + articleId + '/';
+
+      const csrf = document.createElement('input');
+      csrf.type = 'hidden';
+      csrf.name = 'csrfmiddlewaretoken';
+      csrf.value = '{{ csrf_token }}';
+      form.appendChild(csrf);
+
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'description';
+      input.value = desc;
+      form.appendChild(input);
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+</script>
+
+{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<p style="color:red">{{ message }}</p>
+{% endfor %}
+{% endif %}
+<div class="container"> <!-- Begin Container -->
+  <div class="row"> <!-- Begin Row 1  -->
+    <div class="col text-center"> <!-- Begin Row 1 Col 1 -->
+      <h1>Willkommen, {{ user.name }}!</h1>
+      <hr>
+      
+    </div> <!-- End Row 1 Col 1  -->
+  </div> <!--End Row 1 -->
+  <div class="row"><!-- Begin Row 2 -->
+    <div class="col text-center"><!-- Begin Row 2 Col 1 -->
+      <!-- Specials zuerst -->
+      <h2>⭐ Specials</h2>
+      {% for category in categories %}
+      {% if category.title == "Specials" and not user.is_superuser %}
+      {% for article in category.article_set.all %}
+      <button class="btn btn-success" onclick="openPopup({{ article.article_id }}, '{{ article.title }}')"
+        style="font-size: 1.5rem; padding: 1rem; margin: 0.5rem;">
+        {{ article.title }} – {{ article.price }} €
+      </button>
+      {% endfor %}
+      {% endif %}
+      {% endfor %}
+    </div><!-- End Row 2 Col 1 -->
+    <div class="row">
+      {% if recommended_article %}
+    <div class="alert alert-info mt-4">
+        🛒 Personen, die <strong>{{ original_article.title }}</strong> kauften, kauften auch:
+        <a href="#" class="btn btn-sm btn-outline-primary ms-2">
+            {{ recommended_article.title }}
+        </a>
+    </div>
+{% endif %}
+    </div>
+
+  </div><!-- End Row 2 -->
+  <div class="row"><!-- Begin Row 3 -->
+    <!-- Normale Kategorien -->
+    <h2>Kategorien & Artikel</h2>
+    {% for category in categories %}
+    {% if category.title != "Specials" and not user.is_superuser %}
+    <div class="col"> <!-- Begin Row 3 Col x-->
+      <details open="">
+        <summary>
+          <b>{{ category.title }}</b>
+          <p>{{ category.description }}</p>
+        </summary>
+        {% for article in category.article_set.all %}
+          <div class=""><!-- Begin Form div -->
+            <form method="post" action="{% url 'add_to_basket' article.article_id %}" style="display:inline;">
+              {% csrf_token %}
+              <button class="btn btn-secondary mt-2 btn-lg btn-block" type="submit"><strong>{{ article.title }}</strong> 
+                <p> {{ article.price }} €</p>
+                <small>{{ article.description }}</small> </button>
+            </form>
+          </div><!-- End form div -->
+        {% endfor %}
+      </details>
+      </div><!-- End Row 3 Col x-->
+      {% endif %}
+    {% endfor %}
+
+
+  <div class="col">
+    <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary">
+      <h2 class="d-flex align-items-center flex-shrink-0 p-3 link-body-emphasis text-decoration-none border-bottom">🛒
+        Warenkorb</h2>
+      <div class="list-group list-group-flush border-bottom scrollarea">
+
+
+        {% if bought_articles and not user.is_superuser %}
+
+        {% for item in bought_articles %}
+        <div class="container">
+          <div class="row">
+            <div class="list-group-item list-group-item-action py-3 lh-sm">
+              <form method="post" action="{% url 'update_basket_quantity' item.id %}" class="d-inline">
+              {% csrf_token %}
+              <div class="input-group input-group-sm" style="max-width: 70px;">
+                  <select name="amount" class="form-select form-select-sm" onchange="this.form.submit()">
+                      {% for i in 1|to:11 %}
+                          <option value="{{ i }}" {% if item.amount == i %}selected{% endif %}>{{ i }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+          </form>x {{ item.article.title }} – {{item.article.price }} €
+              {% if item.description %}<br><em>{{ item.description }}</em>{% endif %}
+              
+            
+              <form method="post" action="{% url 'remove_from_basket' item.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button class="btn btn-warning" type="submit">X</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        
+        {% endfor %}
+        <p><strong>Gesamtsumme: {{ total }} €</strong></p>
+        <form method="post" action="{% url 'purchase_basket' %}">
+          {% csrf_token %}
+          <button class="btn btn-success text-center btn-lg btn-block" type="submit">Kaufen</button>
+        </form>
+        {% else %}
+        <p>Dein Warenkorb ist leer.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div><!-- End row 3 -->
+</div><!-- End Container -->
+
+
+{% endblock %}

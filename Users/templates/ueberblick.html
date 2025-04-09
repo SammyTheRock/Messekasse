@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block script %}   {% endblock %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+      <div class="col text-center">
+        <h1>🛍 Deine letzten 10 Einkäufe, {{ user.name }}!</h1>
+        <hr>
+  
+      </div>
+    </div>
+    <div class="row">
+        {% if baskets %}
+        {% for basket in baskets %}
+            <details style="margin-bottom: 1rem;">
+                <summary>
+                    🧾 Einkauf vom {{ basket.datetime|date:"d.m.Y H:i" }} – Gesamt: {{ basket.sum }} €
+                </summary>
+                <ul>
+                    {% for item in basket.bought_articles.all %}
+                        <li>{{ item.amount }}x {{ item.article.title }} – {{ item.article.price }} €</li>
+                        {% if item.description %}
+                            <small><em>Notiz: {{ item.description }}</em></small>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </details>
+        {% endfor %}
+    {% else %}
+        <p>Du hast noch keine Einkäufe abgeschlossen.</p>
+    {% endif %}
+    </div>
+    <div class="row">
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                <h2>📈 Konsumverhalten nach Kategorie</h2>
+                <div class="text-center my-4">
+                    <canvas id="radarChart" width="400" height="400" style="max-width: 400px; max-height: 400px;"></canvas>
+                </div>
+                <script>
+                const ctx = document.getElementById('radarChart');
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                    labels: {{ radar_labels|safe }},
+                    datasets: [{
+                        label: 'Käufe pro Kategorie',
+                        data: {{ radar_data|safe }},
+                        fill: true,
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                        pointBackgroundColor: 'rgba(0, 123, 255, 1)'
+                    }]
+                    },
+                    options: {
+                       
+                    scales: {
+                        r: {
+                        beginAtZero: true
+                        }
+                    }
+                    }
+                });
+                </script>
+</div>
+
+    {% endblock %}

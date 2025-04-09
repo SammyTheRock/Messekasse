@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+{% load dict_filters %}
+
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+    <p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">
+        {{ message }}
+    </p>
+{% endfor %}
+{% endif %}
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <h1>💼 Management Dashboard</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <h2>Einzahlung in Messekasse tätigen</h2>
+            <p><strong>Aktueller Kontostand:</strong> {{ wallet.sum }} €</p>
+            <div class="form-control">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="input-group mt-2">
+                        <span class="input-group-text" id="basic-addon1">Betrag</span>
+                        <input class="form-control" type="number" id="amount" name="amount" step="0.01" required>
+                        <span class="input-group-text" id="basic-addon2"> €</span>
+                    </div>
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">
+                            Begründung
+                        </span>
+                        <textarea class="form-control" name="description" rows="3" cols="40" required></textarea><br><br>
+
+                    </div>
+                    <div class="input-group mt-2">
+                        <span class="input-group-text">
+                            Beleg-ID
+                        </span>
+                        <input class="form-control" type="text" name="beleg_id" required><br><br>
+                    </div>
+                
+                
+                    <label for="beleg_id">Beleg-ID:</label><br>
+                
+                    <button class="btn btn-success btn-lg" type="submit" name="action" value="Deposit">➕ Einzahlung (Deposit)</button>
+                    <button class="btn btn-danger btn-lg" type="submit" name="action" value="Debit">➖ Auszahlung/Kauf (Debit)</button>
+                </form>
+            </div>
+           
+        </div>
+    </div>
+    <hr class="my-5">
+    <div class="row">
+        <form action="{% url 'messebeitraege_buchen' %}" method="post" class="mb-4">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Messebeiträge wirklich buchen?')" class="btn btn-danger mt-2 btn-lg btn-block">
+                💶 Messebeiträge abbuchen (20 €)
+            </button>
+        </form>
+    </div>
+    <div class="row">
+        <hr>
+        <h2>👥 Nutzerübersicht</h2>
+        
+        <table border="1" cellpadding="6" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Nutzername</th>
+                    <th>Titel</th>
+                    <th>Aktiv</th>
+                    <th>Email</th>
+                    <th>Wallet-Guthaben</th>
+                    <th>Nutzer deaktivieren</th>
+                    <th>Nutzer administrieren</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>
+                            
+                                {{ user.title|default:"—"  }}
+                          
+                        </td>
+                        <td>{{ user.is_active }}</td>
+                        <td>{{ user.email_address|default:"—" }}</td>
+                        <td>
+                            {{ wallets|get_item:user.user_id|default:"0.00" }} €
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'deaktiviere_nutzer' user.user_id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-lg btn-outline-danger"
+                                        onclick="return confirm('Nutzer {{ user.user_id }} wirklich deaktivieren?')">
+                                    🔒 Deaktivieren
+                                </button>
+                            </form>
+                        
+                        </td>
+                        <td><a href="/admin/Users/user/{{user.user_id}}/change/" class="btn btn-lg btn-lg btn-outline-secondary ms-1">
+                            ⚙️ Nutzer administrieren
+                        </a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+<div class="row">
+    <hr class="my-5">
+
+    <h2>📋 Letzte Admin-Transaktionen</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Datum</th>
+                    <th>Typ</th>
+                    <th>Betrag</th>
+                    <th>Beleg-ID</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in super_activities %}
+                    <tr>
+                        <td>{{ t.datetime|date:"d.m.Y H:i" }}</td>
+                        <td>
+                            {% if t.activity_type == "Deposit" %}
+                                <span class="badge bg-success">Einzahlung</span>
+                            {% else %}
+                                <span class="badge bg-danger">Abhebung/Kauf</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.amount }} €</td>
+                        <td>{{ t.beleg_id }}</td>
+                        <td>{{ t.description|default:"—" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Keine Transaktionen gefunden.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>        
+
+
+    </div>
+
+
+
+    </div>
+    
+
+   
+
+  
+
+   
+    
+   
+
+
+    <p><a href="{% url 'home' %}">🔙 Zurück zur Startseite</a></p>
+    {% endblock %}

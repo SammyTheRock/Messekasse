@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+{% load dict_filters %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <h1 class="mb-4">📊 Monatsübersicht</h1>
+        </div>
+    </div>
+    <div class="row">
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-auto">
+                <label for="month" class="col-form-label">Monat wählen:</label>
+            </div>
+            <div class="col-auto">
+                <select name="month" id="month" class="form-select">
+                    <option value="">Monat wählen</option>
+                    {% for monat in aktive_monate %}
+                        <option value="{{ monat }}" {% if monat == selected_month %}selected{% endif %}>
+                            {{ monat }}
+                        </option>
+                    {% endfor %}
+                </select>
+                        </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Anzeigen</button>
+            </div>
+        </form>
+    
+        {% if daten %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Nutzer</th>
+                            <th>Gesamtausgaben</th>
+                            <th>Aktuelles Guthaben</th>
+                            <th>Specials gekauft</th>
+                            <th>Marinerechnungen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eintrag in daten %}
+                            <tr>
+                                <td>{{ eintrag.user.name }}</td>
+                                <td>{{ eintrag.kauf_summe }} €</td>
+                                <td>{{ eintrag.wallet_sum }} €</td>
+                                <td>{{ eintrag.specials_count }}</td>
+                                <td>
+                                    {% if eintrag.marinerechnungen %}
+                                        <ul class="mb-0">
+                                            {% for ma in eintrag.marinerechnungen %}
+                                                <li>
+                                                    {{ ma.datetime|date:"d.m.Y" }} – {{ ma.amount }} €  
+                                                    <small class="text-muted">({{ ma.description|default:"Keine Beschreibung" }})</small>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        <em>–</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% elif selected_month %}
+            <div class="alert alert-info">Keine Einkäufe im ausgewählten Monat gefunden.</div>
+        {% endif %}
+    </div>
+    <div class="row">
+
+        <hr class="my-5">
+
+        <h2 class="mb-3">🚨 Nutzer mit negativem Saldo</h2>
+        <form action="{% url 'sende_saldoerinnerung' %}" method="post" class="mb-4">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning">
+                📧 E-Mail an alle mit negativem Saldo senden
+            </button>
+        </form>
+        
+        
+        {% if negativ_nutzer %}
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                    <thead class="table-danger">
+                        <tr>
+                            <th>Nutzer</th>
+                            <th>Aktuelles Guthaben</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for eintrag in negativ_nutzer %}
+                            <tr>
+                                <td>{{ eintrag.user.name }}</td>
+                                <td class="text-danger">{{ eintrag.saldo }} €</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <th>Gesamter negativer Saldo:</th>
+                            <th class="text-danger">{{ negativ_summe }} €</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-success">Alle Nutzer sind im positiven Guthaben.</div>
+        {% endif %}
+    </div>
+    </div>
+   
+    {% endblock %}

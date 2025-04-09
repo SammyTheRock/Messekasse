@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load dict_filters %}
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block script %}
+
+
+{% endblock %}
+{% block content %}
+<div class="container mt-5">
+
+    <h1 class="mb-4">👤 Neuen Nutzer anlegen</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        <div class="col-md-6">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" name="name">
+        </div>
+        <div class="col-md-6">
+            <label for="email" class="form-label">E-Mail</label>
+            <input type="email" class="form-control" name="email">
+        </div>
+        <div class="col-md-6">
+            <label for="title" class="form-label">Titel</label>
+            <input type="text" class="form-control" name="title">
+        </div>
+        <div class="col-md-6">
+            <label for="pin" class="form-label">PIN *</label>
+            <input type="password" class="form-control" name="pin" required>
+        </div>
+
+        <div class="col-md-6">
+            <label for="password" class="form-label">Passwort *</label>
+            <input type="password" class="form-control" name="password" required>
+        </div>
+
+        <div class="col-md-6">
+            <label for="barcode" class="form-label">Barcode</label>
+            <input type="text" class="form-control" name="barcode">
+        </div>
+
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Nutzer erstellen</button>
+            <a href="{% url 'management' %}" class="btn btn-secondary">Abbrechen</a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}
+

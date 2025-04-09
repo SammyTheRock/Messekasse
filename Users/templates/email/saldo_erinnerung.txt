@@ -1,0 +1,12 @@
+Hallo {{ user.profile.name|default:user.name }},
+
+deine O-Messe-Rechnung ist fällig.
+
+Dein aktueller Saldo beträgt: -{{ betrag|floatformat:2 }} €
+
+Bitte sende den Betrag schnellstmöglich per PayPal an:
+
+{{ paypal_link }}
+
+Vielen Dank und liebe Grüße,  
+Dein Messekassen-Team

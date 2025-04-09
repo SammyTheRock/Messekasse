@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+
+
+{% block script %}
+<script>
+    function confirmMarinerechnung() {
+        const checkboxes = document.querySelectorAll('input[name="users"]:checked');
+        const amount = parseFloat(document.getElementById('amount').value);
+
+        if (checkboxes.length === 0 || isNaN(amount) || amount <= 0) {
+            alert("Bitte mindestens einen Nutzer auswählen und einen gültigen Betrag eingeben.");
+            return false;
+        }
+
+        const num = checkboxes.length;
+        const share = (amount / num).toFixed(2);
+        return confirm(`Gesamtbetrag: ${amount.toFixed(2)} €\nPersonen: ${num}\nJede Person zahlt: ${share} €\nFortfahren?`);
+    }
+</script>
+
+{% endblock %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">
+    {{ message }}
+</p>
+{% endfor %}
+{% endif %}
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <h1>🧾 Marinerechnung erstellen</h1>
+        </div>
+    </div>
+    <div class="row ">
+        <div class="form-control">
+            <form method="post" onsubmit="return confirmMarinerechnung();">
+                {% csrf_token %}
+                <div class="input-group mt-2">
+                    <span class="input-group-text" id="basic-addon1">Gesamtbetrag</span>
+                    <input class="form-control" type="number" id="amount" name="amount" step="0.01" required><br><br>
+                </div>
+                <div class="input-group mt-2">
+                    <span class="input-group-text" id="basic-addon2">Beschreibung der Rechnung:</span>
+                    <textarea class="form-control" name="description" rows="3" cols="40" required></textarea>
+                </div>
+                    <h3>Aktive Nutzer auswählen:</h3>
+                    {% for user in users %}
+                    <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="users" value="{{ user.user_id }}" >
+                    <label class="form-check-label" >
+                        {{ user.name }}
+                    </label>
+                </div>
+
+                    {% endfor %}
+
+                <button class="btn btn-success" type="submit">Marinerechnung erstellen</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block content %}
+<main class="form-signin w-100 m-auto">
+<h2>Hallo {{ user.name }}!</h2>
+
+<div class="form-floating">
+    <form method="post">
+        {% csrf_token %}
+        {% if user.pin %}
+        <p>Bitte gib deinen PIN ein:</p>
+          <input class="form-control" type="password" name="pin" maxlength="10" required>
+        {% endif %}
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Login</button>
+      </form>
+</div>
+</main>
+
+{% if messages %}
+  {% for message in messages %}
+    <p style="color:red">{{ message }}</p>
+  {% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ section.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div class="row">
+        <div class="col">
+            <img src="{% static 'bw.svg' %}" alt="" class="src" style="width:100%; height:200px">
+        </div>
+        <div class="col col-md-6 text-center">
+            <h1 class="">O-Messe</h1>
+            <h1 class="display-1 ">Baden-W&uuml;rttemberg</h1>
+        </div>
+        <div class="col">
+            <img src="{% static 'FGSBWG.svg' %}" alt="" class="src" style="width:100%; height:200px">
+        </div>
+
+    </div>
+    <hr class="my-4">
+    <div class="row text-center">
+        <h2>Nutzer wählen:</h2>
+        <div class="d-flex gap-2 justify-content-center py-5">           
+            {% for user in users %}
+            {% if user.is_active %}
+            <div class="d-inline-flex align-items-center">
+                <form action="{% url 'login_pin' user.user_id %}" method="get">
+                    {% if user.is_superuser %}
+                    <button class="btn btn-danger btn-lg" type="submit">{{ user.name }}</button>
+                    {% else %}
+                    <button class="btn btn-primary btn-lg" type="submit">{{ user.name }}</button>
+                    {% endif %}
+                </form>
+            </div>
+            {% endif %}
+            {% endfor %}
+
+        </div>
+    </div>
+    <div class="row">
+        <hr class="my-4">
+        <h3>🔔 Zuletzt geklingelt</h3>
+
+        {% if specials %}
+        <ul class="list-group">
+            {% for s in specials %}
+            <li class="list-group-item">
+                <strong>{{s.amount}} x {{ s.article.title }}</strong><br>
+                {% if s.description %}
+                <em>Grund:</em> {{ s.description }}<br>
+                {% endif %}
+                <small class="text-muted">
+                    Gekauft am {{ s.basket.datetime|date:"d.m.Y H:i" }} von {{ s.basket.user.name }}
+                </small>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">Noch keine Specials gekauft.</p>
+        {% endif %}
+    </div>
+    {# Diesen Part auskommentieren, wenn kein Leadbord gewünscht ist #}
+    <div class="row">
+
+        <hr class="my-5">
+
+        <h2>🏆 Leaderboard – Meiste Käufe (30 Tage)</h2>
+
+        {% if leaderboard %}
+        <ol class="list-group list-group-numbered">
+            {% for eintrag in leaderboard %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ eintrag.user.name }} <!-- oder .get_full_name, .email etc. -->
+                <span class="badge bg-primary rounded-pill">{{ eintrag.total |floatformat:2 }} €</span>
+            </li>
+            {% endfor %}
+        </ol>
+
+        {% else %}
+        <div class="alert alert-info">In den letzten 30 Tagen wurden keine Käufe getätigt.</div>
+        {% endif %}
+    </div>
+</div>
+
+
+{% endblock %}

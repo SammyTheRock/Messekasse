@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }}{% endblock %}
+{% load dict_filters %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<p style="color: {% if message.tags == 'error' %}red{% else %}green{% endif %};">
+    {{ message }}
+</p>
+{% endfor %}
+{% endif %}
+<div class="container">
+    <div class="row">
+        <div class="col text-center">
+            <h1>💸 Zentrale Buchung pro Nutzer</h1>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col">
+            <div class="form-control" >
+            <form class="" method="post">
+                {% csrf_token %}
+                
+                        {% for user in users %}
+                        <div class="input-group mt-2">
+                        <span class="input-group-text" id="basic-addon1">{{ user.name }}</span>
+                        <span class="input-group-text" id="basic-addon2">{{ wallets|get_item:user.user_id|default:"0.00" }} € </span>
+                        <input class="form-control" type="number" name="betrag_{{ user.user_id }}" step="0.01">
+                    </div>
+                        {% endfor %}
+                   
+                <br>
+                <button class="btn btn-primary text-center btn-lg" type="submit">Einzahlungen buchen</button>
+            </form>
+        </div>
+        </div>
+      
+</div>
+        <hr class="my-5">
+
+        <h2>📄 Letzte 20 Ein-/Auszahlungen</h2>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Datum</th>
+                        <th>Nutzer</th>
+                        <th>Typ</th>
+                        <th>Betrag</th>
+                        <th>Beleg-ID</th>
+                        <th>Beschreibung</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in transaktionen %}
+                    <tr>
+                        <td>{{ t.datetime|date:"d.m.Y H:i" }}</td>
+                        <td>{{ t.wallet.user.name }}</td>
+                        <td>
+                            {% if t.activity_type == "Deposit" %}
+                            <span class="badge bg-success">Einzahlung</span>
+                            {% else %}
+                            <span class="badge bg-danger">Abhebung</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ t.amount }} €</td>
+                        <td>{{ t.beleg_id }}</td>
+                        <td>{{ t.description|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>  
+    {% endblock %}
