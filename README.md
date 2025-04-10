@@ -1,5 +1,5 @@
 # 📚 Messekassen-System
-## 🧾 Was is this even?
+## 🧾 What is this even?
 
 Dieses Messekassensystem wurde für Messen an Bord entwickelt, um den Verkauf von Waren (z. B. Snacks, Getränke, Merchandise) zu vereinfachen. Es ist ein minimalistisches, aber funktionales Kassensystem mit Fokus auf Einfachheit, Transparenz und gemeinschaftlicher Verwaltung.
 
