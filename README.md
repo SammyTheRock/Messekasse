@@ -45,7 +45,8 @@ python manage.py collectstatic
 python manage.py runserver
 ```
 Zugänglich unter http://localhost:8000
-🤝 Beitrag leisten
+
+## 🤝 Beitrag leisten
 
 Du möchtest helfen? Mega!
 Ideen, wie du mitwirken kannst:
