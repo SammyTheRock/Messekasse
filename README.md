@@ -53,6 +53,8 @@ Ideen, wie du mitwirken kannst:
 
     Verbesserung der Benutzeroberfläche (z. B. mit Icons, Dark Mode, Barrierefreiheit)
 
+    Asynchrone Tasks/ Background-Tasks umsetzen, bspw. monatliche Beträge (Messebeiträge, Kaffeeflat,..) automatisch abziehen, Mails mit negativen Saldo versenden etc
+
     Erstellung eines Dockercontainers 
 
     Unit-Tests oder CI-Integration
